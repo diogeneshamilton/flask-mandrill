@@ -53,7 +53,7 @@ class Mandrill(object):
         if kwargs.get('attachment_urls'):
             data['message']['attachments'] = []
             for attachment_url in kwargs.get('attachment_urls'):
-                data['message']['attachments'] = self.url_to_attachment_data(attachment_url)
+                data['message']['attachments'].append(self.url_to_attachment_json(attachment_url))
 
 
         if self.app:
@@ -81,7 +81,7 @@ class Mandrill(object):
     def templates_endpoint(self):
         return 'https://mandrillapp.com/api/1.0/messages/send-template.json'
         
-    def url_to_attachment_data(self, attachment_url):
+    def url_to_attachment_json(self, attachment_url):
         attachment = urllib.urlopen(attachment_file_url)
         attachment_b64 = base64.encodestring(attachment.read())
         if not attachment_file_name:
