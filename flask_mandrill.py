@@ -1,5 +1,9 @@
-import requests
+import base64
 import json
+import re
+import requests
+import urllib
+
 
 class Mandrill(object):
     app = None
@@ -41,8 +45,16 @@ class Mandrill(object):
             data['template_name'] = kwargs.pop('template_name')
             data['template_content'] = kwargs.pop('template_content', [])
             endpoint = self.templates_endpoint
-
+            
+            
         data['message'] = kwargs
+        
+        # Sending an attachment requires packaging as base64 encoded data. 
+        if kwargs.get('attachment_urls'):
+            data['message']['attachments'] = []
+            for attachment_url in kwargs.get('attachment_urls'):
+                data['message']['attachments'] = self.url_to_attachment_data(attachment_url)
+
 
         if self.app:
             data['message'].setdefault(
@@ -68,3 +80,20 @@ class Mandrill(object):
     @property
     def templates_endpoint(self):
         return 'https://mandrillapp.com/api/1.0/messages/send-template.json'
+        
+    def url_to_attachment_data(self, attachment_url):
+        attachment = urllib.urlopen(attachment_file_url)
+        attachment_b64 = base64.encodestring(attachment.read())
+        if not attachment_file_name:
+            # attempt to grab the file name if included in the response header
+            if attachment.headers.getheader('content-disposition'):
+                attachment_file_name = re.findall("filename=(.+?)([\w+\s\w+(+)+.+]*)",
+                                                      attachment.headers.getheader('content-disposition'))[0][1]
+            else:
+                attachment_file_name = "Unknown"
+        if not attachment_file_format:
+            attachment_file_format = attachment.info().type
+
+        return {'content': attachment_b64,
+                'name': attachment_file_name,
+                'type': attachment_file_format}
