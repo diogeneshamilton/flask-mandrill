@@ -3,6 +3,8 @@ import json
 import re
 import requests
 import urllib
+from posixpath import basename
+from urlparse import urlparse
 
 
 class Mandrill(object):
@@ -89,8 +91,9 @@ class Mandrill(object):
             if attachment.headers.getheader('content-disposition'):
                 attachment_file_name = re.findall("filename=(.+?)([\w+\s\w+(+)+.+]*)",
                                                       attachment.headers.getheader('content-disposition'))[0][1]
+            # just grab the file name
             else:
-                attachment_file_name = "Unknown"
+                attachment_file_name = basename(urlparse(attachment.url))
         if not attachment_file_format:
             attachment_file_format = attachment.info().type
 
