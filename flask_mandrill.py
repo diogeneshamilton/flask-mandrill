@@ -93,7 +93,7 @@ class Mandrill(object):
                                                       attachment.headers.getheader('content-disposition'))[0][1]
             # just grab the file name
             else:
-                attachment_file_name = basename(urlparse(attachment.url))
+                attachment_file_name = basename(urlparse(attachment.url).path)
         if not attachment_file_format:
             attachment_file_format = attachment.info().type
 
